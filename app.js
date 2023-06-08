@@ -24,6 +24,19 @@ const ProductController = (function () {
     getData: function () {
       return data;
     },
+    getProductById: function (id) {
+      let product = null;
+
+      data.products.forEach(function (prd) {
+        if (prd.id == id) {
+          product = prd;
+        }
+      });
+      
+      
+
+      return product;
+    },
     addProduct: function (name, price) {
       let id;
 
@@ -37,6 +50,16 @@ const ProductController = (function () {
       data.products.push(newProduct);
       return newProduct;
     },
+    getTotal: function () {
+      let total = 0;
+
+      data.products.forEach(function (item) {
+        total += item.price;
+      });
+
+      data.totalPrice = total;
+      return data.totalPrice;
+    },
   };
 })();
 
@@ -49,6 +72,8 @@ const UIController = (function () {
     productName: "#productName",
     productPrice: "#ProductPrice",
     productCard: "#productCard",
+    totalTL: "#total-tl",
+    totalDolar: "#total-dolar",
   };
 
   return {
@@ -57,34 +82,30 @@ const UIController = (function () {
 
       products.forEach((prd) => {
         html += `<tr>
-                <td>${prd.id + 1}</td>
+                <td>${prd.id}</td>
                 <td>${prd.name}</td>
                 <td>${prd.price}$</td>
-                <td class="text-right">
-                  <button type="submit" class="btn btn-warning btn-sm">
-                    <i class="far fa-edit"></i>
+                <td class="text-right">                  
+                    <i class="far fa-edit edit-product"></i>
                   </button>
                 </td>
               </tr>
                         `;
       });
 
-      document.querySelector(Selectors.productsList).innerHTML = html;
+      document.querySelector(Selectors.productsList).innerHTML = html;     
     },
     getSelectors: function () {
       return Selectors;
     },
     addProduct: function (prd) {
       document.querySelector(Selectors.productCard).style.display = "block";
-      var item = `
-        <tr>
-        <td>${prd.id + 1}</td>
+      var item = `<tr>
+        <td>${prd.id}</td>
         <td>${prd.name}</td>
         <td>${prd.price}$</td>
         <td class="text-right">
-          <button type="submit" class="btn btn-warning btn-sm">
-            <i class="far fa-edit"></i>
-          </button>
+            <i class="far fa-edit edit-product"></i>
         </td>
       </tr>        
         `;
@@ -97,6 +118,10 @@ const UIController = (function () {
     },
     hideCard: function () {
       document.querySelector(Selectors.productCard).style.display = "none";
+    },
+    showTotal: function (total) {
+      document.querySelector(Selectors.totalDolar).textContent = total;
+      document.querySelector(Selectors.totalTL).textContent = total * 23;
     },
   };
 })();
@@ -111,6 +136,11 @@ const App = (function (ProductCtrl, UICtrl) {
     document
       .querySelector(UISelectors.addButton)
       .addEventListener("click", productAddSubmit);
+
+    //edit product
+    document
+      .querySelector(UISelectors.productsList)
+      .addEventListener("click", productEditSubmit);
   };
 
   const productAddSubmit = function (e) {
@@ -124,6 +154,13 @@ const App = (function (ProductCtrl, UICtrl) {
       // add item to list
       UIController.addProduct(newProduct);
 
+      //get total
+      const total = ProductCtrl.getTotal();
+      console.log(total);
+
+      //show total
+      UICtrl.showTotal(total);
+
       // Clear inputs
       UIController.clearInputs();
     }
@@ -133,9 +170,23 @@ const App = (function (ProductCtrl, UICtrl) {
     e.preventDefault();
   };
 
+  const productEditSubmit = function (e) {
+    if (e.target.classList.contains("edit-product")) {
+      const id =
+        e.target.parentNode.previousElementSibling.previousElementSibling
+          .previousElementSibling.textContent;
+
+      //get selected product
+      const product = ProductCtrl.getProductById(id);     
+      console.log(product);
+    }
+
+    e.preventDefault();
+  };
+
   return {
     init: function () {
-      console.log("Starting App...");
+      console.log("Starting App...");      
       const products = ProductCtrl.getProducts();
 
       if (products.length == 0) {
