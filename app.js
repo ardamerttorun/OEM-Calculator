@@ -11,11 +11,7 @@ const ProductController = (function () {
   };
 
   const data = {
-    products: [
-      { id: 0, name: "Monitör", price: 100 },
-      { id: 1, name: "Ram", price: 30 },
-      { id: 2, name: "KeyBoard", price: 10 },
-    ],
+    products: [],
     selectedProduct: null,
     totalPrice: 0,
   };
@@ -28,16 +24,32 @@ const ProductController = (function () {
     getData: function () {
       return data;
     },
+    addProduct: function (name, price) {
+      let id;
+
+      if (data.products.length > 0) {
+        id = data.products[data.products.length - 1].id + 1;
+      } else {
+        id = 0;
+      }
+
+      const newProduct = new Product(id, name, parseFloat(price));
+      data.products.push(newProduct);
+      return newProduct;
+    },
   };
 })();
 
 // UI Controller
 
 const UIController = (function () {
-
-    const Selectors={
-        productsList:"#item-list"
-    }
+  const Selectors = {
+    productsList: "#item-list",
+    addButton: ".addBtn",
+    productName: "#productName",
+    productPrice: "#ProductPrice",
+    productCard: "#productCard",
+  };
 
   return {
     createProductList: function (products) {
@@ -45,7 +57,7 @@ const UIController = (function () {
 
       products.forEach((prd) => {
         html += `<tr>
-                <td>${prd.id+1}</td>
+                <td>${prd.id + 1}</td>
                 <td>${prd.name}</td>
                 <td>${prd.price}$</td>
                 <td class="text-right">
@@ -59,20 +71,81 @@ const UIController = (function () {
 
       document.querySelector(Selectors.productsList).innerHTML = html;
     },
-    getSelectors:function(){
-        return Selectors;
-    }
+    getSelectors: function () {
+      return Selectors;
+    },
+    addProduct: function (prd) {
+      document.querySelector(Selectors.productCard).style.display = "block";
+      var item = `
+        <tr>
+        <td>${prd.id + 1}</td>
+        <td>${prd.name}</td>
+        <td>${prd.price}$</td>
+        <td class="text-right">
+          <button type="submit" class="btn btn-warning btn-sm">
+            <i class="far fa-edit"></i>
+          </button>
+        </td>
+      </tr>        
+        `;
+
+      document.querySelector(Selectors.productsList).innerHTML += item;
+    },
+    clearInputs: function () {
+      document.querySelector(Selectors.productName).value = "";
+      document.querySelector(Selectors.productPrice).value = "";
+    },
+    hideCard: function () {
+      document.querySelector(Selectors.productCard).style.display = "none";
+    },
   };
 })();
 
 // App Controller
 const App = (function (ProductCtrl, UICtrl) {
+  const UISelectors = UIController.getSelectors();
+
+  // Load Event Listeners
+  const loadEventListeners = function () {
+    // add product event
+    document
+      .querySelector(UISelectors.addButton)
+      .addEventListener("click", productAddSubmit);
+  };
+
+  const productAddSubmit = function (e) {
+    const productName = document.querySelector(UISelectors.productName).value;
+    const productPrice = document.querySelector(UISelectors.productPrice).value;
+
+    if (productName !== "" && productPrice !== "") {
+      // Add prodcut
+      const newProduct = ProductCtrl.addProduct(productName, productPrice);
+
+      // add item to list
+      UIController.addProduct(newProduct);
+
+      // Clear inputs
+      UIController.clearInputs();
+    }
+
+    console.log(productName, productPrice);
+
+    e.preventDefault();
+  };
+
   return {
     init: function () {
       console.log("Starting App...");
       const products = ProductCtrl.getProducts();
 
-      UICtrl.createProductList(products);
+      if (products.length == 0) {
+        UICtrl.hideCard();
+      } else {
+        UICtrl.createProductList(products);
+      }
+
+      // load event listeners
+      loadEventListeners();
     },
   };
 })(ProductController, UIController);
