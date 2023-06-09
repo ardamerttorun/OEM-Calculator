@@ -32,16 +32,14 @@ const ProductController = (function () {
           product = prd;
         }
       });
-      
-      
 
       return product;
     },
-    setCurrentProduct:function(product){
-        data.selectedProduct=product;
+    setCurrentProduct: function (product) {
+      data.selectedProduct = product;
     },
-    getCurrentProduct:function(){
-        return data.selectedProduct;
+    getCurrentProduct: function () {
+      return data.selectedProduct;
     },
     addProduct: function (name, price) {
       let id;
@@ -75,6 +73,9 @@ const UIController = (function () {
   const Selectors = {
     productsList: "#item-list",
     addButton: ".addBtn",
+    updateButton: ".updateBtn",
+    deleteButton: ".deleteBtn",
+    cancelButton: ".cancelBtn",
     productName: "#productName",
     productPrice: "#ProductPrice",
     productCard: "#productCard",
@@ -99,7 +100,7 @@ const UIController = (function () {
                         `;
       });
 
-      document.querySelector(Selectors.productsList).innerHTML = html;     
+      document.querySelector(Selectors.productsList).innerHTML = html;
     },
     getSelectors: function () {
       return Selectors;
@@ -129,17 +130,40 @@ const UIController = (function () {
       document.querySelector(Selectors.totalDolar).textContent = total;
       document.querySelector(Selectors.totalTL).textContent = total * 23;
     },
-    addProductToForm:function(){
-        const selectedProduct=ProductController.getCurrentProduct();
-        document.querySelector(Selectors.productName).value=selectedProduct.name;
-        document.querySelector(Selectors.productPrice).value=selectedProduct.price;
-    }
+    addProductToForm: function () {
+      const selectedProduct = ProductController.getCurrentProduct();
+      document.querySelector(Selectors.productName).value =
+        selectedProduct.name;
+      document.querySelector(Selectors.productPrice).value =
+        selectedProduct.price;
+    },
+    addingState: function () {
+      UIController.clearInputs();
+      document.querySelector(Selectors.addButton).style.display = "inline";
+      document.querySelector(Selectors.updateButton).style.display = "none";
+      document.querySelector(Selectors.deleteButton).style.display = "none";
+      document.querySelector(Selectors.cancelButton).style.display = "none";
+    },
+    editState: function (tr) {
+
+      const parent=tr.parentNode;
+
+      for(let i=0;i<parent.children.length;i++){
+        parent.children[i].classList.remove("bg-warning");
+      }
+
+      tr.classList.add("bg-warning");
+      document.querySelector(Selectors.addButton).style.display = "none";
+      document.querySelector(Selectors.updateButton).style.display = "inline";
+      document.querySelector(Selectors.deleteButton).style.display = "inline";
+      document.querySelector(Selectors.cancelButton).style.display = "inline";
+    },
   };
 })();
 
 // App Controller
 const App = (function (ProductCtrl, UICtrl) {
-  const UISelectors = UIController.getSelectors();
+  const UISelectors = UICtrl.getSelectors();
 
   // Load Event Listeners
   const loadEventListeners = function () {
@@ -188,14 +212,15 @@ const App = (function (ProductCtrl, UICtrl) {
           .previousElementSibling.textContent;
 
       //get selected product
-      const product = ProductCtrl.getProductById(id);     
-      
+      const product = ProductCtrl.getProductById(id);
 
       //set current product
       ProductCtrl.setCurrentProduct(product);
 
       //add product to UI
-      UIController.addProductToForm();
+      UICtrl.addProductToForm();
+
+      UICtrl.editState(e.target.parentNode.parentNode);
     }
 
     e.preventDefault();
@@ -203,7 +228,10 @@ const App = (function (ProductCtrl, UICtrl) {
 
   return {
     init: function () {
-      console.log("Starting App...");      
+      console.log("Starting App...");
+
+      UICtrl.addingState();
+
       const products = ProductCtrl.getProducts();
 
       if (products.length == 0) {
