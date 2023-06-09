@@ -1,48 +1,47 @@
 // Storage Controller
 const StorageController = (function () {
-
-  return{
-    storeProduct:function(product){
+  return {
+    storeProduct: function (product) {
       let products;
-      if(localStorage.getItem("products")===null){
-          products=[];
-          products.push(product);          
-      }else{
-          products=JSON.parse(localStorage.getItem("products"));
-          products.push(product);
+      if (localStorage.getItem("products") === null) {
+        products = [];
+        products.push(product);
+      } else {
+        products = JSON.parse(localStorage.getItem("products"));
+        products.push(product);
       }
-      localStorage.setItem("products",JSON.stringify(products));
+      localStorage.setItem("products", JSON.stringify(products));
     },
-    getProducts:function(){
+    getProducts: function () {
       let products;
-      if(localStorage.getItem("products")===null){
-          products=[];
-      }else{
-        products=JSON.parse(localStorage.getItem("products"));
+      if (localStorage.getItem("products") === null) {
+        products = [];
+      } else {
+        products = JSON.parse(localStorage.getItem("products"));
       }
-    return products;
+      return products;
     },
-    updateProduct:function(product){
-      let products=JSON.parse(localStorage.getItem("products"));
+    updateProduct: function (product) {
+      let products = JSON.parse(localStorage.getItem("products"));
 
-      products.forEach(function(prd,index){
-        if(product.id==prd.id){
-            products.splice(index,1,product);
+      products.forEach(function (prd, index) {
+        if (product.id == prd.id) {
+          products.splice(index, 1, product);
         }
       });
-      localStorage.setItem("products",JSON.stringify(products));
+      localStorage.setItem("products", JSON.stringify(products));
     },
-    deleteProduct:function(id){
-      let products=JSON.parse(localStorage.getItem("products"));
+    deleteProduct: function (id) {
+      let products = JSON.parse(localStorage.getItem("products"));
 
-      products.forEach(function(prd,index){
-        if(id==prd.id){
-            products.splice(index,1);
+      products.forEach(function (prd, index) {
+        if (id == prd.id) {
+          products.splice(index, 1);
         }
       });
-      localStorage.setItem("products",JSON.stringify(products));
-    }
-  }  
+      localStorage.setItem("products", JSON.stringify(products));
+    },
+  };
 })();
 
 // Product Controller
@@ -252,7 +251,7 @@ const UIController = (function () {
 })();
 
 // App Controller
-const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
+const App = (function (ProductCtrl, UICtrl, StorageCtrl) {
   const UISelectors = UICtrl.getSelectors();
 
   // Load Event Listeners
@@ -296,7 +295,6 @@ const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
 
       // add poduct to LS
       StorageCtrl.storeProduct(newProduct);
-
 
       //get total
       const total = ProductCtrl.getTotal();
@@ -393,7 +391,7 @@ const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
 
     UICtrl.addingState();
 
-    if(total==0){
+    if (total == 0) {
       UIController.UICtrl.hideCard();
     }
 
@@ -418,6 +416,6 @@ const App = (function (ProductCtrl, UICtrl,StorageCtrl) {
       loadEventListeners();
     },
   };
-})(ProductController, UIController,StorageController);
+})(ProductController, UIController, StorageController);
 
 App.init();
